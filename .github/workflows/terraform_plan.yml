@@ -40,8 +40,11 @@ jobs:
           terraform plan -no-color -detailed-exitcode > plan_full.txt 2>&1
           exit_code=$?
 
-          summary=$(grep -E "(Plan:|module\.)" plan_full.txt | head -n 20 | tr '\n' ' ')
-          echo "summary_output=$summary" >> $GITHUB_OUTPUT
+          summary=$(grep -E '^(# |  [~+\-])' plan_full.txt | head -n 50)
+
+          echo "summary_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$summary" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
           if [ $exit_code -eq 0 ]; then
             echo "✅ Terraform plan completed with no changes."
