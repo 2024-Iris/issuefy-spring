@@ -3,7 +3,7 @@ name: Terraform Plan on PR
 on:
   pull_request:
     branches:
-      - terraform-test
+      - test
 
 jobs:
   terraform-plan:
