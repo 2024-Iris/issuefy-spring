@@ -5,13 +5,17 @@ on:
     branches:
       - test
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   terraform-plan:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -29,25 +33,30 @@ jobs:
         run: terraform init
         working-directory: ./terraform
 
-      - name: Show directory structure
-        run: ls -R
-
       - name: Terraform Plan
         id: plan
         run: |
-          terraform plan -no-color | tee plan.txt
-          echo "plan_output<<EOF" >> $GITHUB_OUTPUT
-          cat plan.txt >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-        working-directory: ./terraform
+          terraform plan -no-color -detailed-exitcode | tee plan_full.txt
 
-      - name: Comment PR with Plan Output
+          echo "summary_output<<EOF" >> $GITHUB_OUTPUT
+          terraform plan -no-color | grep -E "(Plan:|module\.)" | head -n 20 >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Upload full plan as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-plan
+          path: terraform/plan_full.txt
+
+      - name: Comment PR with Plan Summary
         uses: peter-evans/create-or-update-comment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            ## 📄 Terraform Plan Result
+            ## 📄 Terraform Plan Summary
             ```terraform
-            ${{ steps.plan.outputs.plan_output }}
+            ${{ steps.plan.outputs.summary_output }}
             ```
+
+            ✅ 전체 플랜은 [Artifact:terraform-plan/plan_full.txt]에서 확인하세요.
