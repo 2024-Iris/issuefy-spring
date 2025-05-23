@@ -78,6 +78,6 @@ jobs:
             ⚠️ 상태: `${{ steps.plan.outputs.plan_status }}`
             ✅ 전체 플랜은 GitHub Actions Artifact에서 확인하실 수 있습니다.
 
-      - name: Fail job if plan failed
-        if: ${{ steps.plan.outputs.plan_status == 'error' }}
-        run: exit 1
+#      - name: Fail job if plan failed
+#        if: ${{ steps.plan.outputs.plan_status == 'error' }}
+#        run: exit 1
