@@ -29,6 +29,9 @@ jobs:
         run: terraform init
         working-directory: ./terraform
 
+      - name: Show directory structure
+        run: ls -R
+
       - name: Terraform Plan
         id: plan
         run: |
