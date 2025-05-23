@@ -44,17 +44,15 @@ jobs:
           summary=$( (grep -E "(Plan:|module\.)" plan_full.txt | head -n 20) 2>/dev/null | sed ':a;N;$!ba;s/\n/\\n/g' )
           echo "summary_output=$summary" >> $GITHUB_OUTPUT
 
-          if [ $exit_code -eq 1 ]; then
+          if [ $exit_code -eq 0 ]; then
+            echo "✅ Terraform plan completed with no changes."
+          elif [ $exit_code -eq 2 ]; then
+            echo "✅ Terraform plan completed with changes."
+          elif [ $exit_code -eq 1 ]; then
             echo "❌ Terraform plan failed with errors."
             exit 1
           fi
 
-          if [ $exit_code -eq 2 ]; then
-            echo "✅ Terraform plan completed with changes."
-            exit 0
-          fi
-
-          echo "✅ Terraform plan completed with no changes."
           exit 0
         working-directory: ./terraform
 
