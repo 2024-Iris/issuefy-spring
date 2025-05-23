@@ -27,16 +27,16 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: issuefy-spring/terraform
+        working-directory: ./terraform
 
       - name: Terraform Plan
         id: plan
         run: |
-          cd issuefy-spring/terraform
           terraform plan -no-color | tee plan.txt
           echo "plan_output<<EOF" >> $GITHUB_OUTPUT
           cat plan.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+        working-directory: ./terraform
 
       - name: Comment PR with Plan Output
         uses: peter-evans/create-or-update-comment@v4
