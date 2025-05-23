@@ -42,17 +42,18 @@ jobs:
           terraform plan -no-color -detailed-exitcode | tee plan_full.txt
           exit_code=$?
 
-          summary=$( (grep -E "(Plan:|module\.)" plan_full.txt | head -n 20) 2>/dev/null | sed ':a;N;$!ba;s/\n/\\n/g' )
-          echo "summary_output<<EOF" >> $GITHUB_OUTPUT
-          echo "$summary" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          summary=$(grep -E "(Plan:|module\.)" plan_full.txt | head -n 20 | tr '\n' ' ')
+          echo "summary_output=$summary" >> $GITHUB_OUTPUT
 
           if [ $exit_code -eq 0 ]; then
             echo "✅ Terraform plan completed with no changes."
+            echo "plan_status=success" >> $GITHUB_OUTPUT
           elif [ $exit_code -eq 2 ]; then
             echo "✅ Terraform plan completed with changes."
+            echo "plan_status=changes" >> $GITHUB_OUTPUT
           elif [ $exit_code -eq 1 ]; then
             echo "❌ Terraform plan failed with errors."
+            echo "plan_status=error" >> $GITHUB_OUTPUT
           fi
 
           exit 0
@@ -74,4 +75,9 @@ jobs:
             ${{ steps.plan.outputs.summary_output }}
             ```
 
+            ⚠️ 상태: `${{ steps.plan.outputs.plan_status }}`
             ✅ 전체 플랜은 GitHub Actions Artifact에서 확인하실 수 있습니다.
+
+      - name: Fail job if plan failed
+        if: ${{ steps.plan.outputs.plan_status == 'error' }}
+        run: exit 1
