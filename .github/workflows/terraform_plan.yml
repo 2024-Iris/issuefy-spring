@@ -37,9 +37,7 @@ jobs:
         id: plan
         working-directory: ./terraform
         run: |
-          set -o pipefail
-
-          terraform plan -no-color -detailed-exitcode | tee plan_full.txt
+          terraform plan -no-color -detailed-exitcode > plan_full.txt 2>&1
           exit_code=$?
 
           summary=$(grep -E "(Plan:|module\.)" plan_full.txt | head -n 20 | tr '\n' ' ')
