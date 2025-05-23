@@ -33,14 +33,15 @@ jobs:
         run: terraform init
         working-directory: ./terraform
 
-      - name: Terraform Plan
+      - name: Terraform Plan and Capture Output
         id: plan
         run: |
-          terraform plan -no-color -detailed-exitcode | tee plan_full.txt
+          terraform plan -no-color -detailed-exitcode | tee terraform/plan_full.txt
+          
+          summary=$(grep -E "(Plan:|module\.)" terraform/plan_full.txt | head -n 20 | sed ':a;N;$!ba;s/\n/\\n/g')
+          echo "summary_output=$summary" >> $GITHUB_OUTPUT
 
-          echo "summary_output<<EOF" >> $GITHUB_OUTPUT
-          terraform plan -no-color | grep -E "(Plan:|module\.)" | head -n 20 >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+        working-directory: ./terraform
 
       - name: Upload full plan as artifact
         uses: actions/upload-artifact@v3
@@ -59,4 +60,4 @@ jobs:
             ${{ steps.plan.outputs.summary_output }}
             ```
 
-            ✅ 전체 플랜은 [Artifact:terraform-plan/plan_full.txt]에서 확인하세요.
+            ✅ 전체 플랜은 GitHub Actions Artifact에서 확인하실 수 있습니다.
