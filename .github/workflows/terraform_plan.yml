@@ -36,17 +36,19 @@ jobs:
       - name: Terraform Plan and Capture Output
         id: plan
         run: |
-          terraform plan -no-color -detailed-exitcode | tee terraform/plan_full.txt
+          set -o pipefail
+
+          terraform plan -no-color -detailed-exitcode | tee plan_full.txt
           exit_code=$?
-          
-          summary=$(grep -E "(Plan:|module\.)" terraform/plan_full.txt | head -n 20 | sed ':a;N;$!ba;s/\n/\\n/g')
+
+          summary=$(grep -E "(Plan:|module\.)" plan_full.txt | head -n 20 | sed ':a;N;$!ba;s/\n/\\n/g')
           echo "summary_output=$summary" >> $GITHUB_OUTPUT
-          
+
           if [ $exit_code -eq 1 ]; then
             echo "Terraform plan failed with errors."
             exit 1
           fi
-          
+
           exit 0
         working-directory: ./terraform
 
@@ -54,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
-          path: terraform/plan_full.txt
+          path: ./terraform/plan_full.txt
 
       - name: Comment PR with Plan Summary
         uses: peter-evans/create-or-update-comment@v4
