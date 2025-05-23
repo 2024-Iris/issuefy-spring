@@ -38,9 +38,10 @@ jobs:
         id: plan
         working-directory: ./terraform
         run: |
-          terraform plan -no-color -detailed-exitcode > plan_full.txt 2>&1
+          set +e
+          terraform plan -no-color -detailed-exitcode > >(tee plan_full.txt) 2> >(tee plan_full.txt >&2)
           exit_code=$?
-          echo "Terraform exited with code: $exit_code"
+          set -e
           
           resource_summary=$(grep -E '^(# |  [~+\-])' plan_full.txt | head -n 50)
           
