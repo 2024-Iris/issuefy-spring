@@ -8,9 +8,9 @@ import lombok.Data;
 
 @Data
 public class LokiQueryAddRepositoryDto {
-	private String addRepositoryCount = "0";
 	private static final int COUNT_INDEX = 1;
 	private static final int FIRST_RESULT_INDEX = 0;
+	private String addRepositoryCount = "0";
 
 	@JsonProperty("data")
 	private void unpackData(Data data) {
